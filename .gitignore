@@ -1,0 +1,8 @@
+# Ignorar todo
+*
+
+# Excepto los archivos siguientes
+!.gitignore
+!SOFT_BASE/SoftMain.c
+
+!*/
