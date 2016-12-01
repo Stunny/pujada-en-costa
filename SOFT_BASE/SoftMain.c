@@ -32,11 +32,16 @@ void inicialitza() {
     LS_Init();
 }
 
+void LS_Main(){
+    
+}
+
 int main(void) {
     
     inicialitza();
     while (1) {
         LS_Executiu();
+        LS_Main();
     }
     return 0;
 }
