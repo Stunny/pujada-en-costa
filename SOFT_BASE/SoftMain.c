@@ -33,6 +33,13 @@ void inicialitza() {
 }
 
 void LS_Main(){
+    // Comprobacion de estado
+    int x, y, z;
+    
+    LS_ACC_GetPosXYZf(&x, &y, &z);
+    
+    
+    // Correcciones de trayectoria
     
 }
 
