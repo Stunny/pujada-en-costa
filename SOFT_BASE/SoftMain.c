@@ -1,32 +1,49 @@
 //
-//-------------------------PROGRAMA DE TEST DE l'LSMAKER--------------------
+//----------------------------------------PROGRAMA DE TEST DE l'LSMAKER-----
 //
-// Aquest és el programa que porta carregat "de fàbrica" l'LSMaker.
-// Només fa que moure els motors endavant i endarrera i enviar una
-// trama per l'enllaç de radiofreqüencia. Per la pantalla de l'LCD
-// mostra la tensió de la bateria, l'adreça mac, el nom d'usuari 
-// que hagis configurat amb el programa LSLoader, la inclinació XYZ i
+// Aquest ?s el programa que porta carregat "de f?brica" l'LSMaker.
+// Nom?s fa que moure els motors endavant i endarrera i enviar una
+// trama per l'enlla? de radiofreq?encia. Per la pantalla de l'LCD
+// mostra la tensi? de la bateria, l'adre?a mac, el nom d'usuari 
+// que hagis configurat amb el programa LSLoader, la inclinaci? XYZ i
 // el valor dels senyals STOP0, STOP1 i STOP2 (Blanc o Negre)
 //
-// Per crear la teva propia aplicació, només cal que baixis el directori
+// Per crear la teva propia aplicaci?, nom?s cal que baixis el directori
 // LS_API i el directori Proves i ja pots engegar el MPLAB i obrir el projecte
-// TestMain. El projecte ja te tots els tads i l'API ben configurada, només
-// cal que afegeixis els teus propis TADS i la teva aplicació en lloc de 
+// TestMain. El projecte ja te tots els tads i l'API ben configurada, nom?s
+// cal que afegeixis els teus propis TADS i la teva aplicaci? en lloc de 
 // la "ProvaDeCalibracio"
 // 
 
-//------------------------------LLIBRERIES-------------------------
-#include "../LS_API/LSApi.h"
-//-------------------------END--LLIBRERIES-------------------------
+//
+//----------------------------------------PROTOTIPUS---------------
+//
 
-//------------------------------CONSTANTS--------------------------
-// Opcions de configuració del microprocessador PIC16F64
+//
+//----------------------------------------PROTOTIPUS---------------
+//
+#include "../LS_API/LSApi.h"
+//
+//------------------------------END-------PROTOTIPUS---------------
+//
+//
+//----------------------------------------CONSTANTS----------------
+//
+
+// Opcions de configuraci? del microprocessador PIC16F64
 _CONFIG2(OSCIOFNC_ON);
 _CONFIG1(JTAGEN_OFF & ICS_PGx1);
-//-------------------------END--CONSTANTS--------------------------
 
-//------------------------------TIPUS------------------------------
-//-------------------------END--TIPUS------------------------------
+//
+//------------------------------END-------CONSTANTS----------------
+//
+
+//
+//----------------------------------------VARIABLES----------------
+//
+//
+//------------------------------END-------VARIABLES----------------
+//
 
 char GetS(unsigned int MaskStop) {
 	// Retorna Blanc o Negre segons el que valgui aquest senyal d'stop
@@ -34,9 +51,6 @@ char GetS(unsigned int MaskStop) {
 	return 'B';
 }
 
-/**
- * Muestra por el LCD los valores de los ejes X, Y, Z
- */
 void MotorInfo(void) {	
 	// Refresca la pantalla LCD cada 250ms amb el valor de la bateria i els
 	// angles de l'accelerometre
@@ -60,45 +74,115 @@ void MotorInfo(void) {
 				AcGetXYZ(&Xf, &Yf, &Zf); X = Xf; Y = Yf; Z = Zf;
 				LS_LCD_Printf(0,2, "XYZ= %+03d,%+03d,%+03d", X, Y, Z);
 				// El valor dels senyals de Stop0, Stop1 i Stop2
-				LS_LCD_Printf(6,3, "%c%c%c", GetS(MT_STOP_0),GetS(MT_STOP_1), GetS(MT_STOP_2));
+				LS_LCD_Printf(6,3, "%c%c%c", GetS(MT_STOP_1),GetS(MT_STOP_0), GetS(MT_STOP_2));
 				// El robot est? adquirint?
 			}
 			break;
 	}
 }
 
-void inicialitza() {
-    LS_Init();
+// Subtrutines de moviment
+void AV50(void) { int Stop; int temps;
+	temps = LS_MT_GetTimeFromDistance(50, 60); // 50 cm a velocitat 60
+	LS_MT_Lineal(temps, 60, 0, &Stop);
 }
 
-/** Modificado el fichero RftRadio.c para proteger de tramas de 
- *  broadcast ajenas el dispositivo. 
- *  @Funcion: RfEsBroadcast(...)
- */
-
-void LS_Main(){
-    // *****************************************Comprobacion de estado
-    // Cada 250ms Actualiza los valores X, Y, Z de pantalla
-        //LS_SYS_AddStateMachine(MotorInfo, 250);
-    MotorInfo();
-    
-    
-    //Parametros que decuelve el acelerometro    
-    
-    
-    // ******************************************Correcciones de trayectoria
-    
+void RE50(void) { int Stop; int temps;
+	temps = LS_MT_GetTimeFromDistance(50, 60); // 50 cm a velocitat -60
+	LS_MT_Lineal(temps, -60, 0, &Stop);
 }
 
-int main(void) {
+
+void GD90(void) { int Stop; int angle;
+	angle = LS_MT_GetTimeFromAngle(90, 40); // 90 graus a 40
+	LS_MT_TurnRight(angle, 40, 0, 0, &Stop);
+}
+
+void GE90(void) { int Stop; int angle;
+	angle = LS_MT_GetTimeFromAngle(90, 40); // 90 graus a 40
+	LS_MT_TurnLeft(angle, 40, 0, 0, &Stop);
+}
+
+int ProvaDeCalibracio(int enderezado){ 
+	
+    AV50();
+    int X, Y, Z; float Xf, Yf, Zf, stopReason;
+    AcGetXYZ(&Xf, &Yf, &Zf); X = Xf; Y = Yf; Z = Zf;
     
-    inicialitza();
-    
-    while(!LS_IO_GpButtonPress()){}
-    
-    while (1) {
-        LS_Executiu();
-        LS_Main();
+    //Enderezar robot hasta estar cuesta arriba (hasta que y = 0 & x < 10)
+    while((Y < -5 || Y > 5) && enderezado == 0){
+        if(Y > 0){
+            //Enderezar derecha derecha
+            LS_MT_TurnRight(LS_MT_GetTimeFromDistance(2, 50), 10, 0, 0, &stopReason);
+        }
+        if (Y < 0){
+            //Enderezar izquierda
+            LS_MT_TurnLeft(LS_MT_GetTimeFromDistance(2, 50), 10, 0, 0, &stopReason);
+        }
     }
-    return 0;
+    
+    if(enderezado == 0) enderezado = 1;
+    
+    //Diferentes situaciones de subir de frente
+    if(X < 10){
+        
+        //Subir recto
+        if(Y > -5 && Y < 5){
+            LS_MT_Lineal(LS_MT_GetTimeFromDistance(15, 100), 100, 0, &stopReason);
+        }
+        
+        //Subir girando a derecha
+        if(Y < -10){
+            LS_MT_TurnRight(LS_MT_GetTimeFromDistance(3, 100), 100, 0, 0, &stopReason);
+        }
+        
+        //Subir girando a izquierda
+        if(Y > 10){
+            LS_MT_TurnLeft(LS_MT_GetTimeFromDistance(3, 100), 100, 0, 0, &stopReason);
+        }
+    }
+    
+    //Diferentes situaciones de subir marcha atras
+    if(X > 10){
+        
+        //Subir recto
+        if(Y > -5 && Y < 5){
+            LS_MT_Lineal(LS_MT_GetTimeFromDistance(15, -100), -100, 0, &stopReason);
+        }
+        
+        //Subir girando a derecha
+        if(Y < -10){
+            LS_MT_TurnLeft(LS_MT_GetTimeFromDistance(3, -100), -100, 0, 0, &stopReason);
+        }
+        
+        //Subir girando a izquierda
+        if(Y > 10){
+            LS_MT_TurnRight(LS_MT_GetTimeFromDistance(3, -100), -100, 0, 0, &stopReason);
+        }
+    }
+	
+    return enderezado;
 }
+
+void Inicialitza(void) {
+	LS_Init();	// Inicialitza la API de l'LSMaker
+	// Aqu? vindrien les inicialitzacions pr?pies de l'aplicaci?
+}
+
+int main(void) { 
+	// Aqu? comen?a el programa.
+    
+    int start = 0, enderezado = 0;
+    
+	Inicialitza();
+	LS_SYS_AddStateMachine(MotorInfo, 250);	// Una m?quina d'estats per refrescar l'LCD cada 250ms
+	while (1) {	// El bucle principal
+        
+        if (LS_IO_GpButtonPress()) start = 1;
+        
+        if(start)
+            enderezado = ProvaDeCalibracio(enderezado); 
+ 	}
+	return 0;
+}
+
