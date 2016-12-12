@@ -110,15 +110,15 @@ int ProvaDeCalibracio(int enderezado){
     AcGetXYZ(&Xf, &Yf, &Zf); X = Xf; Y = Yf; Z = Zf;
     
     //Enderezar robot hasta estar cuesta arriba (hasta que y = 0 & x < 10)
-    while((Y < -5 || Y > 5) && enderezado == 0){
+    while(!(X < 10) && enderezado == 0){
         if(Y > 0){
             //Enderezar derecha
-            LS_MT_TurnRight(LS_MT_GetTimeFromDistance(2, 50), 10, 0, 0, &stopReason);
+            LS_MT_TurnRight(LS_MT_GetTimeFromDistance(5, 100), 100, 0, 0, &stopReason);
             LS_LCD_Printf(1,2, "E Derecha");
         }
         if (Y < 0){
             //Enderezar izquierda
-            LS_MT_TurnLeft(LS_MT_GetTimeFromDistance(2, 50), 10, 0, 0, &stopReason);
+            LS_MT_TurnLeft(LS_MT_GetTimeFromDistance(5, 100), 100, 0, 0, &stopReason);
             LS_LCD_Printf(1,2, "E Izq");
             //Velocitats diferents (50 -> 10) en els dos enderezar
         }
@@ -149,7 +149,7 @@ int ProvaDeCalibracio(int enderezado){
     }
     
     //Diferentes situaciones de subir marcha atras
-    if(X > 10){
+    /*if(X > 10){
         
         //Subir recto
         if(Y > -5 && Y < 5){
@@ -168,7 +168,7 @@ int ProvaDeCalibracio(int enderezado){
             LS_MT_TurnRight(LS_MT_GetTimeFromDistance(3, -100), -100, 0, 0, &stopReason);
             LS_LCD_Printf(1,2, "Bajar Izq");
         }
-    }
+    }*/
 	
     return enderezado;
 }
