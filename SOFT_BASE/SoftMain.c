@@ -67,14 +67,14 @@ void MotorInfo(void) {
 			else {
 				// Mentre adquireix, millor no fer servir l'LCD ja que fa perdre
 				// precisi? al motor de calcul de posici?
-				LS_LCD_Printf(15,0, " ");
+				//LS_LCD_Printf(15,0, " ");
 				// Estat de la bateria
-				LS_LCD_Printf(0,3, "B=%03d", LS_SYS_GetBatteryVoltage());
+				//LS_LCD_Printf(0,3, "B=%03d", LS_SYS_GetBatteryVoltage());
 				// Els angles XYZ de l'acceler?metre
 				AcGetXYZ(&Xf, &Yf, &Zf); X = Xf; Y = Yf; Z = Zf;
 				LS_LCD_Printf(0,2, "XYZ= %+03d,%+03d,%+03d", X, Y, Z);
 				// El valor dels senyals de Stop0, Stop1 i Stop2
-				LS_LCD_Printf(6,3, "%c%c%c", GetS(MT_STOP_1),GetS(MT_STOP_0), GetS(MT_STOP_2));
+				//LS_LCD_Printf(6,3, "%c%c%c", GetS(MT_STOP_1),GetS(MT_STOP_0), GetS(MT_STOP_2));
 				// El robot est? adquirint?
 			}
 			break;
@@ -105,19 +105,22 @@ void GE90(void) { int Stop; int angle;
 
 int ProvaDeCalibracio(int enderezado){ 
 	
-    AV50();
+    //AV50();
     int X, Y, Z; float Xf, Yf, Zf, stopReason;
     AcGetXYZ(&Xf, &Yf, &Zf); X = Xf; Y = Yf; Z = Zf;
     
     //Enderezar robot hasta estar cuesta arriba (hasta que y = 0 & x < 10)
     while((Y < -5 || Y > 5) && enderezado == 0){
         if(Y > 0){
-            //Enderezar derecha derecha
+            //Enderezar derecha
             LS_MT_TurnRight(LS_MT_GetTimeFromDistance(2, 50), 10, 0, 0, &stopReason);
+            LS_LCD_Printf(1,2, "E Derecha");
         }
         if (Y < 0){
             //Enderezar izquierda
             LS_MT_TurnLeft(LS_MT_GetTimeFromDistance(2, 50), 10, 0, 0, &stopReason);
+            LS_LCD_Printf(1,2, "E Izq");
+            //Velocitats diferents (50 -> 10) en els dos enderezar
         }
     }
     
@@ -129,16 +132,19 @@ int ProvaDeCalibracio(int enderezado){
         //Subir recto
         if(Y > -5 && Y < 5){
             LS_MT_Lineal(LS_MT_GetTimeFromDistance(15, 100), 100, 0, &stopReason);
+            LS_LCD_Printf(1,2, "Subir");
         }
         
         //Subir girando a derecha
         if(Y < -10){
             LS_MT_TurnRight(LS_MT_GetTimeFromDistance(3, 100), 100, 0, 0, &stopReason);
+            LS_LCD_Printf(1,2, "Subir Der");
         }
         
         //Subir girando a izquierda
         if(Y > 10){
             LS_MT_TurnLeft(LS_MT_GetTimeFromDistance(3, 100), 100, 0, 0, &stopReason);
+            LS_LCD_Printf(1,2, "Subir Izq");
         }
     }
     
@@ -148,16 +154,19 @@ int ProvaDeCalibracio(int enderezado){
         //Subir recto
         if(Y > -5 && Y < 5){
             LS_MT_Lineal(LS_MT_GetTimeFromDistance(15, -100), -100, 0, &stopReason);
+            LS_LCD_Printf(1,2, "Bajar");
         }
         
         //Subir girando a derecha
         if(Y < -10){
             LS_MT_TurnLeft(LS_MT_GetTimeFromDistance(3, -100), -100, 0, 0, &stopReason);
+            LS_LCD_Printf(1,2, "Bajar Der");
         }
         
         //Subir girando a izquierda
         if(Y > 10){
             LS_MT_TurnRight(LS_MT_GetTimeFromDistance(3, -100), -100, 0, 0, &stopReason);
+            LS_LCD_Printf(1,2, "Bajar Izq");
         }
     }
 	
